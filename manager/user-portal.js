@@ -104,24 +104,22 @@ class UserPortal {
     }
 
     async fetchUserSignatures(userId) {
-        // Use the same pattern as admin-script.js
         const query = `
-            query GetUserSignatures($userId: ID!) {
+            query GetUserSignatures($userId: String!) {
                 listSignatures(filter: {userId: {eq: $userId}}) {
                     items {
                         id
                         noticeId
                         userId
                         userName
-                        userEmail
-                        signedAt
+                        timestamp
                         createdAt
                         updatedAt
                     }
                 }
             }
         `;
-        
+
         const data = await graphqlRequest(query, { userId });
         return data.listSignatures.items;
     }
@@ -134,8 +132,7 @@ class UserPortal {
                     noticeId
                     userId
                     userName
-                    userEmail
-                    signedAt
+                    timestamp
                 }
             }
         `;
@@ -148,8 +145,7 @@ class UserPortal {
                 noticeId: signatureData.noticeId,
                 userId: signatureData.userId,
                 userName: signatureData.userName,
-                userEmail: signatureData.userEmail,
-                signedAt: signatureData.signedAt
+                timestamp: signatureData.timestamp
             }
         };
 
@@ -207,7 +203,7 @@ class UserPortal {
                                         <span class="text-green-200">You acknowledged this notice</span>
                                     </div>
                                     <span class="text-sm text-green-300">
-                                        ${this.formatDate(userSignature.signedAt)}
+                                        ${this.formatDate(userSignature.timestamp)}
                                     </span>
                                 </div>
                             </div>
@@ -242,8 +238,7 @@ class UserPortal {
                 noticeId: noticeId,
                 userId: this.currentUser.dbUser.id,
                 userName: this.currentUser.dbUser.name,
-                userEmail: this.currentUser.dbUser.email,
-                signedAt: new Date().toISOString()
+                timestamp: new Date().toISOString()
             });
 
             this.userSignatures.push(signature);
