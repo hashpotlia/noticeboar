@@ -86,8 +86,9 @@ class UserPortal {
                 fetchAllNotices(),
                 this.fetchUserSignatures(this.currentUser.dbUser.id)
             ]);
-            
-            this.notices = notices.filter(notice => notice.isActive);
+
+            // Keep all notices unless explicitly marked inactive
+            this.notices = notices.filter(n => n.isActive !== false);
             this.userSignatures = signatures;
             
             console.log('✅ User data loaded:', {
@@ -183,7 +184,7 @@ class UserPortal {
                                 <div class="flex items-center space-x-4 text-sm text-slate-400">
                                     <span>📅 ${this.formatDate(notice.createdAt)}</span>
                                     <span>👤 ${notice.author}</span>
-                                    ${notice.department !== 'All' ? `<span>🏢 ${notice.department}</span>` : ''}
+                                    ${notice.department ? `<span>🏢 ${notice.department}</span>` : ''}
                                 </div>
                             </div>
                             <div class="flex items-center space-x-2">
