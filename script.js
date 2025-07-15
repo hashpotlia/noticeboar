@@ -140,7 +140,6 @@ async function createSignatureInDB(signatureData) {
         input: {
             id: uniqueId,
             noticeId: signatureData.noticeId,
-            noticeID: signatureData.noticeId,
             userId: signatureData.userId,
             userName: signatureData.userName,
             timestamp: signatureData.timestamp

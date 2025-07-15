@@ -145,7 +145,6 @@ class UserPortal {
             input: {
                 id: uniqueId,
                 noticeId: signatureData.noticeId,
-                noticeID: signatureData.noticeId,
                 userId: signatureData.userId,
                 userName: signatureData.userName,
                 userEmail: signatureData.userEmail,
