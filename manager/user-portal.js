@@ -125,6 +125,38 @@ class UserPortal {
         return data.listSignatures.items;
     }
 
+    async createSignature(signatureData) {
+        const mutation = `
+            mutation CreateSignature($input: CreateSignatureInput!) {
+                createSignature(input: $input) {
+                    id
+                    noticeId
+                    userId
+                    userName
+                    userEmail
+                    signedAt
+                }
+            }
+        `;
+
+        const uniqueId = 'sig-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+        const variables = {
+            input: {
+                id: uniqueId,
+                noticeId: signatureData.noticeId,
+                noticeID: signatureData.noticeId,
+                userId: signatureData.userId,
+                userName: signatureData.userName,
+                userEmail: signatureData.userEmail,
+                signedAt: signatureData.signedAt
+            }
+        };
+
+        const data = await graphqlRequest(mutation, variables);
+        return data.createSignature;
+    }
+
     renderNotices() {
         const container = document.getElementById('notices-container');
         
@@ -206,8 +238,7 @@ class UserPortal {
         }
 
         try {
-            // Use existing createSignature from admin-script.js
-            const signature = await createSignature({
+            const signature = await this.createSignature({
                 noticeId: noticeId,
                 userId: this.currentUser.dbUser.id,
                 userName: this.currentUser.dbUser.name,

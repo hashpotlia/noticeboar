@@ -207,6 +207,17 @@ class AKLNoticeBoard {
         this.currentUser = userData;
     }
 
+    hasActiveSession() {
+        try {
+            const session = localStorage.getItem('userSession') || sessionStorage.getItem('userSession');
+            if (!session) return false;
+            const data = JSON.parse(session);
+            return data && data.email && data.userRole;
+        } catch {
+            return false;
+        }
+    }
+
     // Setup all event listeners
     setupEventListeners() {
         // Navigation buttons
@@ -915,7 +926,11 @@ renderNoticeCard(notice) {
         document.querySelectorAll('.sign-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const noticeId = e.target.closest('.sign-btn').dataset.noticeId;
-                this.showSignatureModal(noticeId);
+                if (this.hasActiveSession()) {
+                    this.showSignatureModal(noticeId);
+                } else {
+                    window.location.href = 'manager/index.html';
+                }
             });
         });
     }
