@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AKL NoticeBoard - User Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="admin-style.css">
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+    <!-- Your existing HTML content -->
+    <header class="bg-slate-800 border-b border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="text-2xl">📋</div>
+                    <div>
+                        <h1 class="text-xl font-bold">AKL NoticeBoard</h1>
+                        <p class="text-xs text-slate-400">User Portal</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div id="user-info" class="text-right">
+                        <div class="text-sm font-medium" id="user-name">Loading...</div>
+                        <div class="text-xs text-slate-400" id="user-email">Please wait...</div>
+                    </div>
+                    <button id="logout-btn" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg transition-colors">
+                        🚪 Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="flex items-center justify-center min-h-screen">
+        <div class="text-center">
+            <div class="text-6xl mb-4">🔄</div>
+            <h2 class="text-xl font-semibold mb-2">Loading...</h2>
+            <p class="text-slate-400">Verifying your access...</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style="display: none;">
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-2">📢 Company Notices</h2>
+            <p class="text-slate-400">Review and acknowledge important company notices below.</p>
+        </div>
+        <div id="notices-container" class="space-y-6"></div>
+    </main>
+
+    <div id="modal-container"></div>
+
+    <!-- Use your existing scripts -->
+    <script src="admin-script.js"></script>
+    <script src="user-portal.js"></script>
+</body>
+</html>

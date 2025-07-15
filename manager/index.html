@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AKL NoticeBoard - Manager Portal</title>
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#1e293b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛠️</text></svg>">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="../style.css">
+    <!-- Admin Specific Styles -->
+    <link rel="stylesheet" href="admin-style.css">
+</head>
+
+<body class="antialiased">
+
+<!-- Updated Login modal -->
+<div id="login-modal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
+    <div class="bg-slate-800 rounded-lg p-8 max-w-md w-full mx-4 border border-slate-700">
+        <div class="text-center mb-6">
+            <div class="text-4xl mb-4">🛠️</div>
+            <h2 class="text-2xl font-bold text-white mb-2">Manager Portal</h2>
+            <p class="text-slate-400" id="auth-subtitle">Please sign in to continue</p>
+        </div>
+        
+        <!-- Login Form -->
+        <form id="login-form" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Email</label>
+                <input type="email" id="login-email" required 
+                       class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+                       placeholder="Enter your email">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Password</label>
+                <input type="password" id="login-password" required 
+                       class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+                       placeholder="Enter your password">
+            </div>
+            
+            <button type="submit" id="login-btn" 
+                    class="w-full bg-amber-600 hover:bg-amber-500 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                🔐 Sign In
+            </button>
+        </form>
+
+        <!-- Signup Form (Initially Hidden) -->
+        <form id="signup-form" class="space-y-4 hidden">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Email</label>
+                <input type="email" id="signup-email" required 
+                       class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+                       placeholder="Enter your email">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Password</label>
+                <input type="password" id="signup-password" required 
+                       class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+                       placeholder="Create a password (min 8 characters)">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Confirm Password</label>
+                <input type="password" id="signup-confirm-password" required 
+                       class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+                       placeholder="Confirm your password">
+            </div>
+            
+            <button type="submit" id="signup-btn" 
+                    class="w-full bg-green-600 hover:bg-green-500 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                ✨ Create Account
+            </button>
+        </form>
+		
+		<!-- Signup Confirmation Form (Initially Hidden) -->
+<form id="signup-confirm-form" class="space-y-4 hidden">
+    <div class="text-center mb-4">
+        <div class="text-4xl mb-2">📧</div>
+        <p class="text-sm text-slate-400">We've sent a verification code to your email</p>
+        <p class="text-xs text-slate-500 mt-1">Check your inbox and spam folder</p>
+    </div>
+    
+    <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">Verification Code</label>
+        <input type="text" id="signup-code" required 
+               class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+               placeholder="Enter 6-digit code"
+               maxlength="6">
+    </div>
+    
+    <button type="submit" id="signup-confirm-btn" 
+            class="w-full bg-green-600 hover:bg-green-500 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+        ✅ Verify Account
+    </button>
+    
+    <div class="text-center">
+        <p class="text-sm text-slate-400 mb-2">Didn't receive the code?</p>
+        <button type="button" id="resend-signup-code-btn" 
+                class="text-blue-400 hover:text-blue-300 text-sm transition-colors">
+            📧 Resend Code
+        </button>
+    </div>
+</form>
+
+
+        <!-- Password Reset Form (Initially Hidden) -->
+        <form id="reset-form" class="space-y-4 hidden">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Email</label>
+                <input type="email" id="reset-email" required 
+                       class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+                       placeholder="Enter your email">
+            </div>
+            
+            <button type="submit" id="reset-btn" 
+                    class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+                📧 Send Reset Link
+            </button>
+        </form>
+		
+		<!-- Password Reset Confirmation Form (Initially Hidden) -->
+<form id="reset-confirm-form" class="space-y-4 hidden">
+    <div class="text-center mb-4">
+        <p class="text-sm text-slate-400">Enter the verification code sent to your email</p>
+    </div>
+    
+    <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">Verification Code</label>
+        <input type="text" id="reset-code" required 
+               class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+               placeholder="Enter 6-digit code">
+    </div>
+    
+    <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">New Password</label>
+        <input type="password" id="reset-new-password" required 
+               class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+               placeholder="Enter new password (min 8 characters)">
+    </div>
+    
+    <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">Confirm New Password</label>
+        <input type="password" id="reset-confirm-password" required 
+               class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500"
+               placeholder="Confirm new password">
+    </div>
+    
+    <button type="submit" id="reset-confirm-btn" 
+            class="w-full bg-green-600 hover:bg-green-500 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
+        🔐 Reset Password
+    </button>
+</form>
+
+        
+        <div id="login-error" class="mt-4 p-3 bg-red-900/50 border border-red-500 rounded-lg text-red-300 text-sm hidden"></div>
+        
+        <!-- Auth Mode Switcher -->
+        <div class="mt-6 text-center space-y-2">
+            <div id="login-mode-switcher">
+                <button type="button" id="show-signup" class="text-green-400 hover:text-green-300 text-sm transition-colors mr-4">
+                    ✨ Create Account
+                </button>
+                <button type="button" id="show-reset" class="text-blue-400 hover:text-blue-300 text-sm transition-colors">
+                    🔑 Forgot Password?
+                </button>
+            </div>
+            
+            <div id="signup-mode-switcher" class="hidden">
+                <button type="button" id="back-to-login" class="text-amber-400 hover:text-amber-300 text-sm transition-colors">
+                    ← Back to Sign In
+                </button>
+            </div>
+            
+            <div id="reset-mode-switcher" class="hidden">
+                <button type="button" id="back-to-login-2" class="text-amber-400 hover:text-amber-300 text-sm transition-colors">
+                    ← Back to Sign In
+                </button>
+            </div>
+			
+			<div id="reset-confirm-mode-switcher" class="hidden">
+    <button type="button" id="back-to-reset" class="text-blue-400 hover:text-blue-300 text-sm transition-colors mr-4">
+        ← Back to Reset
+    </button>
+    <button type="button" id="back-to-login-3" class="text-amber-400 hover:text-amber-300 text-sm transition-colors">
+        ← Back to Sign In
+    </button>
+</div>
+
+<div id="signup-confirm-mode-switcher" class="hidden">
+    <button type="button" id="back-to-signup" class="text-green-400 hover:text-green-300 text-sm transition-colors mr-4">
+        ← Back to Sign Up
+    </button>
+    <button type="button" id="back-to-login-4" class="text-amber-400 hover:text-amber-300 text-sm transition-colors">
+        ← Back to Sign In
+    </button>
+</div>
+
+
+			
+        </div>
+        
+        <div class="mt-4 text-center">
+            <a href="../index.html" class="text-slate-500 hover:text-slate-400 text-sm transition-colors">
+                ← Back to Notice Board
+            </a>
+        </div>
+    </div>
+</div>
+
+
+
+    <div id="admin-app" class="min-h-screen bg-slate-900 text-slate-300 flex flex-col">
+
+        <!-- Admin Header -->
+        <header class="bg-slate-900/70 backdrop-blur-lg sticky top-0 z-40 border-b border-slate-800">
+            <nav class="container mx-auto px-4 lg:px-6">
+                <div class="flex items-center justify-between h-16">
+                    <!-- Logo / Title -->
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <svg class="w-8 h-8 text-amber-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold text-slate-100">🛠️ Manager Portal</h1>
+                            <p class="text-xs text-slate-400 hidden md:block">AKL NoticeBoard Administration</p>
+                        </div>
+                    </div>
+
+                    <!-- Navigation -->
+					<div class="hidden md:flex items-center space-x-6">
+						<button id="nav-dashboard" class="admin-tab active" data-tab="dashboard">
+							📊 Dashboard
+						</button>
+						<button id="nav-notices" class="admin-tab" data-tab="notices">
+							📝 Manage Notices
+						</button>
+						<button id="nav-users" class="admin-tab" data-tab="users">
+							👥 Manage Users
+						</button>
+						<button id="nav-acknowledgments" class="admin-tab" data-tab="acknowledgments">
+							✍️ Acknowledgments
+						</button>
+						<button id="nav-analytics" class="admin-tab" data-tab="analytics">
+							📈 Analytics
+						</button>
+					</div>
+
+
+                    <!-- User Actions -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Home Button -->
+                        <a href="../index.html" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm flex items-center space-x-2">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                            </svg>
+                            <span class="hidden md:inline">Home</span>
+                        </a>
+						
+						<!-- Log out -->
+<div class="flex items-center space-x-4">
+    <button id="logout-btn" class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+        🚪 Logout
+    </button>
+</div>
+
+
+                        <!-- Admin Info -->
+                        <div class="text-sm text-slate-400">
+                            User: <span id="admin-name" class="text-amber-400 font-semibold">Loading...</span>
+                        </div>
+
+                        <!-- Mobile Menu -->
+                        <button id="mobile-menu-btn" class="md:hidden p-2 rounded-md hover:bg-slate-800 transition-colors">
+                            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile Navigation -->
+				<div id="mobile-nav" class="hidden md:hidden pb-4 border-t border-slate-800 mt-4">
+					<div class="flex flex-col space-y-2 pt-4">
+						<button class="admin-tab mobile text-left px-3 py-2 rounded-md transition-colors" data-tab="dashboard">📊 Dashboard</button>
+						<button class="admin-tab mobile text-left px-3 py-2 rounded-md transition-colors" data-tab="notices">📝 Manage Notices</button>
+						<button class="admin-tab mobile text-left px-3 py-2 rounded-md transition-colors" data-tab="users">👥 Manage Users</button>
+						<button class="admin-tab mobile text-left px-3 py-2 rounded-md transition-colors" data-tab="acknowledgments">✍️ Acknowledgments</button>
+						<button class="admin-tab mobile text-left px-3 py-2 rounded-md transition-colors" data-tab="analytics">📈 Analytics</button>
+					</div>
+				</div>
+
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto p-4 md:p-6 lg:p-8">
+            
+            <!-- Admin Content Container -->
+            <div id="admin-content">
+                <!-- Dynamic content based on selected tab -->
+                
+                <!-- Dashboard Content (Default) -->
+                <div id="dashboard-content" class="admin-tab-content active">
+                    <!-- Key Metrics Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="metric-card bg-blue-900/30 border-blue-500">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-blue-400 text-sm font-medium">Total Notices</p>
+                                    <p class="text-3xl font-bold text-white" id="total-notices-count">0</p>
+                                </div>
+                                <div class="text-blue-400 text-3xl">📋</div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card bg-amber-900/30 border-amber-500">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-amber-400 text-sm font-medium">Pending Acknowledgments</p>
+                                    <p class="text-3xl font-bold text-white" id="pending-acks-count">0</p>
+                                </div>
+                                <div class="text-amber-400 text-3xl">⏳</div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card bg-red-900/30 border-red-500">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-red-400 text-sm font-medium">Critical Notices</p>
+                                    <p class="text-3xl font-bold text-white" id="critical-notices-count">0</p>
+                                </div>
+                                <div class="text-red-400 text-3xl">🚨</div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card bg-green-900/30 border-green-500">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-green-400 text-sm font-medium">Acknowledgment Rate</p>
+                                    <p class="text-3xl font-bold text-white" id="ack-rate">0%</p>
+                                </div>
+                                <div class="text-green-400 text-3xl">📊</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-slate-800 rounded-lg p-6 border border-slate-700 mb-8">
+                        <h2 class="text-xl font-bold text-white mb-4">🚀 Quick Actions</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <button class="quick-action-btn bg-amber-600 hover:bg-amber-500" onclick="showPostNoticeModal()">
+                                📝 Post New Notice
+                            </button>
+                            <button class="quick-action-btn bg-red-600 hover:bg-red-500" onclick="postCriticalNotice()">
+                                🚨 Post Critical Notice
+                            </button>
+                            <button class="quick-action-btn bg-blue-600 hover:bg-blue-500" onclick="exportComplianceReport()">
+                                📊 Export Compliance Report
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                        <h2 class="text-xl font-bold text-white mb-4">📈 Recent Activity</h2>
+                        <div id="recent-activity" class="space-y-3">
+                            <!-- Dynamic activity feed -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notice Management Content -->
+                <div id="notices-content" class="admin-tab-content">
+                    <!-- Notice Management Header -->
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                        <h2 class="text-2xl font-bold text-white">📝 Notice Management</h2>
+                        <div class="flex items-center space-x-4">
+                            <button class="btn-primary" onclick="showPostNoticeModal()">
+                                ➕ Post New Notice
+                            </button>
+                            <button class="btn-secondary" onclick="showBulkActionsModal()">
+                                📦 Bulk Actions
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filters and Search -->
+                    <div class="bg-slate-800 rounded-lg p-4 border border-slate-700 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <input type="text" id="notice-search" placeholder="Search notices..." class="form-input">
+                            <select id="category-filter" class="form-select">
+                                <option value="">All Categories</option>
+                                <option value="Safety">🦺 Safety</option>
+                                <option value="Operations">⚙️ Operations</option>
+                                <option value="Policy">📜 Policy</option>
+                                <option value="HR">👥 HR</option>
+                                <option value="Training">🎓 Training</option>
+                                <option value="Maintenance">🔧 Maintenance</option>
+                            </select>
+                            <select id="priority-filter" class="form-select">
+                                <option value="">All Priorities</option>
+                                <option value="critical">🚨 Critical</option>
+                                <option value="high">⚠️ High</option>
+                                <option value="medium">📋 Medium</option>
+                                <option value="low">💡 Low</option>
+                            </select>
+                            <select id="status-filter" class="form-select">
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="expired">Expired</option>
+                                <option value="pinned">Pinned</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Notices Table -->
+                    <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-slate-700">
+                                    <tr>
+                                        <th class="table-header">
+                                            <input type="checkbox" id="select-all-notices" class="rounded">
+                                        </th>
+                                        <th class="table-header">Title</th>
+                                        <th class="table-header">Category</th>
+                                        <th class="table-header">Priority</th>
+                                        <th class="table-header">Author</th>
+                                        <th class="table-header">Created</th>
+                                        <th class="table-header">Ack Rate</th>
+                                        <th class="table-header">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="notices-table-body">
+                                    <!-- Dynamic notice rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div id="notices-pagination" class="mt-6">
+                        <!-- Pagination controls -->
+                    </div>
+                </div>
+				
+				<!-- User Management Content -->
+<div id="users-content" class="admin-tab-content">
+    <!-- User Management Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <h2 class="text-2xl font-bold text-white">👥 User Management</h2>
+        <div class="flex items-center space-x-4">
+            <button class="btn-primary" onclick="showCreateUserModal()">
+                ➕ Add New User
+            </button>
+            <button class="btn-secondary" onclick="showBulkUserActionsModal()">
+                📦 Bulk Actions
+            </button>
+        </div>
+    </div>
+
+    <!-- User Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="metric-card bg-blue-900/30 border-blue-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-blue-400 text-sm font-medium">Total Users</p>
+                    <p class="text-3xl font-bold text-white" id="total-users-stat">0</p>
+                </div>
+                <div class="text-blue-400 text-3xl">👥</div>
+            </div>
+        </div>
+        
+        <div class="metric-card bg-green-900/30 border-green-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-green-400 text-sm font-medium">Active Users</p>
+                    <p class="text-3xl font-bold text-white" id="active-users-stat">0</p>
+                </div>
+                <div class="text-green-400 text-3xl">✅</div>
+            </div>
+        </div>
+        
+        <div class="metric-card bg-amber-900/30 border-amber-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-amber-400 text-sm font-medium">Managers</p>
+                    <p class="text-3xl font-bold text-white" id="managers-stat">0</p>
+                </div>
+                <div class="text-amber-400 text-3xl">👔</div>
+            </div>
+        </div>
+        
+        <div class="metric-card bg-red-900/30 border-red-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-red-400 text-sm font-medium">Super Admins</p>
+                    <p class="text-3xl font-bold text-white" id="admins-stat">0</p>
+                </div>
+                <div class="text-red-400 text-3xl">🔑</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Filters -->
+    <div class="bg-slate-800 rounded-lg p-4 border border-slate-700 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input type="text" id="user-search" placeholder="Search users..." class="form-input">
+            <select id="role-filter" class="form-select">
+                <option value="">All Roles</option>
+                <option value="SUPER_ADMIN">🔑 Super Admin</option>
+                <option value="MANAGER">👔 Manager</option>
+                <option value="USER">👤 User</option>
+            </select>
+            <select id="department-filter" class="form-select">
+                <option value="">All Departments</option>
+                <option value="Management">Management</option>
+                <option value="Operations">Operations</option>
+                <option value="Safety">Safety</option>
+                <option value="Maintenance">Maintenance</option>
+                <option value="General">General</option>
+            </select>
+            <select id="user-status-filter" class="form-select">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-slate-700">
+                    <tr>
+                        <th class="table-header">
+                            <input type="checkbox" id="select-all-users" class="rounded">
+                        </th>
+                        <th class="table-header">User</th>
+                        <th class="table-header">Role</th>
+                        <th class="table-header">Department</th>
+                        <th class="table-header">Status</th>
+                        <th class="table-header">Last Login</th>
+                        <th class="table-header">Created</th>
+                        <th class="table-header">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <!-- Dynamic user rows -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+                <!-- Acknowledgments Content -->
+                <div id="acknowledgments-content" class="admin-tab-content">
+                    <h2 class="text-2xl font-bold text-white mb-6">✍️ Acknowledgment Tracking</h2>
+
+                    <!-- Acknowledgment Overview -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        <!-- By Notice View -->
+                        <div class="lg:col-span-2 bg-slate-800 rounded-lg p-6 border border-slate-700">
+                            <h3 class="text-lg font-bold text-white mb-4">📋 By Notice</h3>
+                            <div class="space-y-4" id="notice-ack-list">
+                                <!-- Dynamic notice acknowledgment cards -->
+                            </div>
+                        </div>
+
+                        <!-- Quick Stats -->
+                        <div class="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                            <h3 class="text-lg font-bold text-white mb-4">📊 Quick Stats</h3>
+                            <div class="space-y-4">
+                                <div class="stat-item">
+                                    <span class="text-slate-400">Overall Compliance Rate</span>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="overall-compliance-bar"></div>
+                                        </div>
+                                        <span class="text-white font-bold" id="overall-compliance-text">0%</span>
+                                    </div>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="text-slate-400">Total Users</span>
+                                    <span class="text-white font-bold" id="total-users-count">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="text-slate-400">Overdue Acknowledgments</span>
+                                    <span class="text-red-400 font-bold" id="overdue-count">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Acknowledgment Table -->
+                    <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+                        <div class="p-4 border-b border-slate-700">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-bold text-white">📝 Detailed Acknowledgment Log</h3>
+                                <button class="btn-secondary" onclick="exportAcknowledgmentReport()">
+                                    📊 Export Report
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-slate-700">
+                                    <tr>
+                                        <th class="table-header">Notice</th>
+                                        <th class="table-header">User</th>
+                                        <th class="table-header">Acknowledged At</th>
+                                        <th class="table-header">Response Time</th>
+                                        <th class="table-header">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="acknowledgment-table-body">
+                                    <!-- Dynamic acknowledgment rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Content -->
+                <div id="analytics-content" class="admin-tab-content">
+                    <h2 class="text-2xl font-bold text-white mb-6">📈 Analytics & Reports</h2>
+                    
+                    <!-- Analytics Dashboard -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Acknowledgment Trends -->
+                        <div class="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                            <h3 class="text-lg font-bold text-white mb-4">📊 Acknowledgment Trends</h3>
+                            <div id="acknowledgment-chart" class="h-64 flex items-center justify-center text-slate-400">
+                                Chart visualization would go here
+                            </div>
+                        </div>
+
+                        <!-- Category Breakdown -->
+                        <div class="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                            <h3 class="text-lg font-bold text-white mb-4">🏷️ Category Breakdown</h3>
+                            <div id="category-breakdown" class="space-y-3">
+                                <!-- Dynamic category stats -->
+                            </div>
+                        </div>
+
+                        <!-- User Performance -->
+                        <div class="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                            <h3 class="text-lg font-bold text-white mb-4">👥 User Performance</h3>
+                            <div id="user-performance" class="space-y-3">
+                                <!-- Dynamic user stats -->
+                            </div>
+                        </div>
+
+                        <!-- Export Options -->
+                        <div class="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                            <h3 class="text-lg font-bold text-white mb-4">📤 Export Options</h3>
+                            <div class="space-y-3">
+                                <button class="export-btn" onclick="exportComplianceReport()">
+                                    📊 Compliance Report
+                                </button>
+                                <button class="export-btn" onclick="exportUserReport()">
+                                    👥 User Activity Report
+                                </button>
+                                <button class="export-btn" onclick="exportNoticeReport()">
+                                    📝 Notice Summary Report
+                                </button>
+                                <button class="export-btn" onclick="exportFullDatabase()">
+                                    💾 Full Database Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 border-t border-slate-800 mt-auto">
+            <div class="container mx-auto py-4 px-6 text-center text-slate-500 text-sm">
+                <p>AKL NoticeBoard Manager Portal v1.0 - Complete Management Control</p>
+                <p class="text-xs mt-1">Part of the DCO Ecosystem • Made with ❤️ for AKL Management</p>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Modals Container -->
+    <div id="modal-container"></div>
+    
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50"></div>
+
+    <!-- Scripts -->
+    <script src="admin-script.js"></script>
+</body>
+</html>
