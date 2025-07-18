@@ -140,7 +140,6 @@ async function createSignatureInDB(signatureData) {
         input: {
             id: uniqueId,
             noticeId: signatureData.noticeId,
-            noticeID: signatureData.noticeId,
             userId: signatureData.userId,
             userName: signatureData.userName,
             timestamp: signatureData.timestamp
@@ -205,6 +204,17 @@ class AKLNoticeBoard {
         localStorage.setItem('akl_user_name', userData.name);
         localStorage.setItem('akl_user_email', userData.email || '');
         this.currentUser = userData;
+    }
+
+    hasActiveSession() {
+        try {
+            const session = localStorage.getItem('userSession') || sessionStorage.getItem('userSession');
+            if (!session) return false;
+            const data = JSON.parse(session);
+            return data && data.email && data.userRole;
+        } catch {
+            return false;
+        }
     }
 
     // Setup all event listeners
@@ -915,7 +925,11 @@ renderNoticeCard(notice) {
         document.querySelectorAll('.sign-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const noticeId = e.target.closest('.sign-btn').dataset.noticeId;
-                this.showSignatureModal(noticeId);
+                if (this.hasActiveSession()) {
+                    this.showSignatureModal(noticeId);
+                } else {
+                    window.location.href = 'manager/index.html';
+                }
             });
         });
     }

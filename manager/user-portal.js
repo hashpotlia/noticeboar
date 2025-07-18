@@ -86,8 +86,9 @@ class UserPortal {
                 fetchAllNotices(),
                 this.fetchUserSignatures(this.currentUser.dbUser.id)
             ]);
-            
-            this.notices = notices.filter(notice => notice.isActive);
+
+            // Keep all notices unless explicitly marked inactive
+            this.notices = notices.filter(n => n.isActive !== false);
             this.userSignatures = signatures;
             
             console.log('✅ User data loaded:', {
@@ -103,26 +104,53 @@ class UserPortal {
     }
 
     async fetchUserSignatures(userId) {
-        // Use the same pattern as admin-script.js
         const query = `
-            query GetUserSignatures($userId: ID!) {
+            query GetUserSignatures($userId: String!) {
                 listSignatures(filter: {userId: {eq: $userId}}) {
                     items {
                         id
                         noticeId
                         userId
                         userName
-                        userEmail
-                        signedAt
+                        timestamp
                         createdAt
                         updatedAt
                     }
                 }
             }
         `;
-        
+
         const data = await graphqlRequest(query, { userId });
         return data.listSignatures.items;
+    }
+
+    async createSignature(signatureData) {
+        const mutation = `
+            mutation CreateSignature($input: CreateSignatureInput!) {
+                createSignature(input: $input) {
+                    id
+                    noticeId
+                    userId
+                    userName
+                    timestamp
+                }
+            }
+        `;
+
+        const uniqueId = 'sig-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+        const variables = {
+            input: {
+                id: uniqueId,
+                noticeId: signatureData.noticeId,
+                userId: signatureData.userId,
+                userName: signatureData.userName,
+                timestamp: signatureData.timestamp
+            }
+        };
+
+        const data = await graphqlRequest(mutation, variables);
+        return data.createSignature;
     }
 
     renderNotices() {
@@ -152,7 +180,7 @@ class UserPortal {
                                 <div class="flex items-center space-x-4 text-sm text-slate-400">
                                     <span>📅 ${this.formatDate(notice.createdAt)}</span>
                                     <span>👤 ${notice.author}</span>
-                                    ${notice.department !== 'All' ? `<span>🏢 ${notice.department}</span>` : ''}
+                                    ${notice.department ? `<span>🏢 ${notice.department}</span>` : ''}
                                 </div>
                             </div>
                             <div class="flex items-center space-x-2">
@@ -175,7 +203,7 @@ class UserPortal {
                                         <span class="text-green-200">You acknowledged this notice</span>
                                     </div>
                                     <span class="text-sm text-green-300">
-                                        ${this.formatDate(userSignature.signedAt)}
+                                        ${this.formatDate(userSignature.timestamp)}
                                     </span>
                                 </div>
                             </div>
@@ -206,13 +234,11 @@ class UserPortal {
         }
 
         try {
-            // Use existing createSignature from admin-script.js
-            const signature = await createSignature({
+            const signature = await this.createSignature({
                 noticeId: noticeId,
                 userId: this.currentUser.dbUser.id,
                 userName: this.currentUser.dbUser.name,
-                userEmail: this.currentUser.dbUser.email,
-                signedAt: new Date().toISOString()
+                timestamp: new Date().toISOString()
             });
 
             this.userSignatures.push(signature);
